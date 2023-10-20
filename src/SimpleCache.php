@@ -25,7 +25,7 @@ class SimpleCache
         if (file_exists($filename)) {
             $stock_cache_time = time() - @filectime($filename);
 
-            $delaySeconds = $delayMinutes * 60;  // Convertir les minutes en secondes
+            $delaySeconds = $delayMinutes * 60;  // Convert minutes to seconds
 
             if ($delaySeconds > 0 && $stock_cache_time > $delaySeconds) {
                 $this->clear($key);
@@ -84,7 +84,11 @@ class SimpleCache
     private function decodeContent($content, $type)
     {
         if ($type === 'array' || $type === 'object') {
-            return unserialize($content);
+            try {
+                return unserialize($content);
+            } catch(Exception $e) {
+                return false;
+            }
         }
 
         return $content;

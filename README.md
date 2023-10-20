@@ -27,35 +27,74 @@ require 'vendor/autoload.php';
 $cache = new SimpleCache('/path/to/cache/directory/');
 ```
 
-### Setting a Cache Value
+## Usage
+
+### Basic Usage
 
 ```php
-$cache->set('cle', 'valeur');
+
+// Set cache
+$cache->set('key', 'value');
+
+// Get cache
+$value = $cache->get('key');
 ```
 
-### Retrieving a Cache Value
+### Using Expiration Time
+
+You can specify an expiration time in minutes using the `$delayMinutes` parameter.
 
 ```php
-$valeur = $cache->get('cle');
+// Set cache with a 10-minute expiration time
+$cache->set('key', 'value');
+
+// Get cache, valid for 10 minutes
+$value = $cache->get('key', 'string', 10);
+```
+
+### Storing Arrays and Objects
+
+You can also store arrays and objects.
+
+```php
+// Storing an array
+$cache->set('array_key', ['a' => 1, 'b' => 2]);
+
+// Retrieving an array
+$array = $cache->get('array_key', 'array');
+
+// Storing an object
+$object = new stdClass();
+$object->property = 'value';
+$cache->set('object_key', $object);
+
+// Retrieving an object
+$object = $cache->get('object_key', 'object');
+```
+
+### Using Subdirectories as Keys
+
+You can use subdirectories in keys for better organization.
+
+```php
+// Set cache in a subdirectory
+$cache->set('user/1', 'value');
+
+// Get cache from a subdirectory
+$value = $cache->get('user/1');
 ```
 
 ### Clearing the Cache
 
-```php
-$cache->clear();
-```
-
-### Bypassing the Cache
+The clear method allows you to remove cached items based on a pattern. This is useful for batch invalidation of cache items.
 
 ```php
-$cache->shouldBypassCache = true;
-```
+// Clear a specific cache item
+$cache->clear('key');
 
-## Tests
+// Clear all cache items in a subdirectory
+$cache->clear('user/*');
 
-To run the tests, use PHPUnit:
-
-
-```bash
-phpunit test/
+// Clear all cache items
+$cache->clear('*');
 ```
