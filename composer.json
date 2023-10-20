@@ -1,0 +1,18 @@
+{
+    "name": "mrmanchot/simple-cache",
+    "description": "A simple and efficient PHP library for cache management.",
+    "require": {
+        "phpunit/phpunit": "^10.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mrmanchot\\SimpleCache\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Cédric Mouleyre",
+            "email": "mouleyrecedric@gmail.com"
+        }
+    ]
+}
