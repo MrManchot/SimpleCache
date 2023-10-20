@@ -13,7 +13,6 @@ class SimpleCache
         $this->cacheDir = $cacheDir;
     }
 
-
     public function get($key, $type = 'string', $delayMinutes = 0)
     {
         if ($this->shouldBypassCache) {
@@ -22,51 +21,46 @@ class SimpleCache
 
         $filename = $this->getCacheFilePath($key);
 
-        if (file_exists($filename)) {
-            $stock_cache_time = (time() - @filectime($filename)) / 60;
+        if (is_readable($filename)) {
+            if ($delayMinutes > 0) {
+                $stock_cache_time = (time() - filemtime($filename)) / 60;
+                if ($stock_cache_time > $delayMinutes) {
+                    $this->clear($key);
+                    return false;
+                }
+            }
 
-            if ($delayMinutes > 0 && $stock_cache_time > $delayMinutes) {
+            $content = file_get_contents($filename);
+            if ($content === false || $content === '') {
                 $this->clear($key);
                 return false;
             }
 
-            $content = @file_get_contents($filename);
-            if ($content === false || strlen($content) === 0) {
-                $this->clear($key);
-                return false;
-            }
-
-            return $this->decodeContent($content, $type, $key);
+            return $this->decodeContent($content, $type);
         }
 
         return false;
     }
 
-
     public function set($key, $value)
     {
         $filename = $this->getCacheFilePath($key);
-
         if (strpos($key, '/') !== false) {
             $this->ensureDirectoryExists(dirname($filename));
         }
 
         $encodedValue = $this->encodeContent($value);
-        if (file_put_contents($filename, $encodedValue, LOCK_EX) === false) {
-            error_log('Failed to write cache item with key: ' . $key);
-        }
+        file_put_contents($filename, $encodedValue, LOCK_EX);
     }
 
     public function clear($pattern = '*')
     {
         $files = glob($this->cacheDir . $pattern);
-        $files[] = $this->getCacheFilePath($pattern);
-
-        array_map(function ($file) {
+        foreach ($files as $file) {
             if (is_file($file)) {
                 unlink($file);
             }
-        }, $files);
+        }
     }
 
     private function getCacheFilePath($key)
@@ -83,25 +77,11 @@ class SimpleCache
 
     private function encodeContent($value)
     {
-        if (is_array($value) || is_object($value)) {
-            return serialize($value);
-        }
-
-        return $value;
+        return is_string($value) ? $value : json_encode($value);
     }
 
-    private function decodeContent($content, $type, $key)
+    private function decodeContent($content, $type)
     {
-        if ($type === 'array' || $type === 'object') {
-            $unserialized = @unserialize($content);
-            if ($unserialized === false && $content !== 'b:0;') {
-                error_log('Failed to unserialize cache item with key: ' . $key);
-                $this->clear($key);
-                return false;
-            }
-            return $unserialized;
-        }
-
-        return $content;
+        return $type === 'string' ? $content : json_decode($content, $type === 'array');
     }
 }
