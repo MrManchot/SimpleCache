@@ -2,10 +2,10 @@
 
 A simple and efficient PHP library for cache management.
 
-## Caractéristiques
+## Features
 
 - Easy to use
-- Supports multiple data types: strings, arrays, objects
+- Supports multiple data types: strings, arrays, objects, and booleans
 - Allows setting cache expiration time
 - Option to bypass cache
 
@@ -27,12 +27,9 @@ require 'vendor/autoload.php';
 $cache = new SimpleCache('/path/to/cache/directory/');
 ```
 
-## Usage
-
 ### Basic Usage
 
 ```php
-
 // Set cache
 $cache->set('key', 'value');
 
@@ -52,9 +49,9 @@ $cache->set('key', 'value');
 $value = $cache->get('key', 'string', 10);
 ```
 
-### Storing Arrays and Objects
+### Storing Arrays, Objects, and Booleans
 
-You can also store arrays and objects.
+You can also store arrays, objects, and booleans.
 
 ```php
 // Storing an array
@@ -70,6 +67,12 @@ $cache->set('object_key', $object);
 
 // Retrieving an object
 $object = $cache->get('object_key', 'object');
+
+// Storing a boolean
+$cache->set('boolean_key', true);
+
+// Retrieving a boolean
+$boolean = $cache->get('boolean_key', 'bool');
 ```
 
 ### Using Subdirectories as Keys

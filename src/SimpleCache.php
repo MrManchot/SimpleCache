@@ -56,6 +56,7 @@ class SimpleCache
     public function clear($pattern = '*')
     {
         $files = glob($this->cacheDir . $pattern);
+        $files[] = $this->getCacheFilePath($pattern);
         foreach ($files as $file) {
             if (is_file($file)) {
                 unlink($file);
@@ -77,11 +78,17 @@ class SimpleCache
 
     private function encodeContent($value)
     {
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
         return is_string($value) ? $value : json_encode($value);
     }
 
     private function decodeContent($content, $type)
     {
+        if ($type === 'bool') {
+            return $content === 'true';
+        }
         return $type === 'string' ? $content : json_decode($content, $type === 'array');
     }
 }
