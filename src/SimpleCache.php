@@ -89,6 +89,9 @@ class SimpleCache
         if ($type === 'bool') {
             return $content === 'true';
         }
+        if ($type === 'string' && $content === 'false') {
+            return '';
+        }
         return $type === 'string' ? $content : json_decode($content, $type === 'array');
     }
 }
