@@ -2,7 +2,10 @@
     "name": "mrmanchot/simple-cache",
     "description": "A simple and efficient PHP library for cache management.",
     "require": {
-        "phpunit/phpunit": "^10.4"
+        "php": ">=7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0"
     },
     "autoload": {
         "psr-4": {
