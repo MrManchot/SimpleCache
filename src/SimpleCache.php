@@ -23,17 +23,20 @@ class SimpleCache
         $filename = $this->getCacheFilePath($key);
 
         if (file_exists($filename)) {
-            $stock_cache_time = time() - @filectime($filename);
+            $stock_cache_time = (time() - @filectime($filename)) / 60;
 
-            $delaySeconds = $delayMinutes * 60;  // Convert minutes to seconds
-
-            if ($delaySeconds > 0 && $stock_cache_time > $delaySeconds) {
+            if ($delayMinutes > 0 && $stock_cache_time > $delayMinutes) {
                 $this->clear($key);
                 return false;
             }
 
-            $content = file_get_contents($filename);
-            return $this->decodeContent($content, $type);
+            $content = @file_get_contents($filename);
+            if ($content === false || strlen($content) === 0) {
+                $this->clear($key);
+                return false;
+            }
+
+            return $this->decodeContent($content, $type, $key);
         }
 
         return false;
@@ -49,7 +52,9 @@ class SimpleCache
         }
 
         $encodedValue = $this->encodeContent($value);
-        return file_put_contents($filename, $encodedValue);
+        if (file_put_contents($filename, $encodedValue, LOCK_EX) === false) {
+            error_log('Failed to write cache item with key: ' . $key);
+        }
     }
 
     public function clear($pattern = '*')
@@ -57,7 +62,11 @@ class SimpleCache
         $files = glob($this->cacheDir . $pattern);
         $files[] = $this->getCacheFilePath($pattern);
 
-        array_map('unlink', array_filter($files, 'is_file'));
+        array_map(function ($file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }, $files);
     }
 
     private function getCacheFilePath($key)
@@ -81,14 +90,16 @@ class SimpleCache
         return $value;
     }
 
-    private function decodeContent($content, $type)
+    private function decodeContent($content, $type, $key)
     {
         if ($type === 'array' || $type === 'object') {
-            try {
-                return unserialize($content);
-            } catch(Exception $e) {
+            $unserialized = @unserialize($content);
+            if ($unserialized === false && $content !== 'b:0;') {
+                error_log('Failed to unserialize cache item with key: ' . $key);
+                $this->clear($key);
                 return false;
             }
+            return $unserialized;
         }
 
         return $content;
