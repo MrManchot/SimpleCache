@@ -59,7 +59,7 @@ class SimpleCache
         $files[] = $this->getCacheFilePath($pattern);
         foreach ($files as $file) {
             if (is_file($file)) {
-                unlink($file);
+                @unlink($file);
             }
         }
     }
