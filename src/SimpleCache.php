@@ -1,5 +1,7 @@
 <?php
 
+namespace Mrmanchot\SimpleCache;
+
 class SimpleCache
 {
     private $cacheDir;
