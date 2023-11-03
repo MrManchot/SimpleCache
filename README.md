@@ -27,6 +27,14 @@ require 'vendor/autoload.php';
 $cache = new SimpleCache('/path/to/cache/directory/');
 ```
 
+or
+
+```php
+use Mrmanchot\SimpleCache\SimpleCache;
+
+$cache = new SimpleCache('/path/to/cache/directory/');
+```
+
 ### Basic Usage
 
 ```php
