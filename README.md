@@ -22,15 +22,8 @@ composer require mrmanchot/simple-cache
 ### Initialization
 
 ```php
-require 'vendor/autoload.php';
-
-$cache = new SimpleCache('/path/to/cache/directory/');
-```
-
-or
-
-```php
 use Mrmanchot\SimpleCache\SimpleCache;
+require 'vendor/autoload.php';
 
 $cache = new SimpleCache('/path/to/cache/directory/');
 ```
@@ -54,7 +47,7 @@ You can specify an expiration time in minutes using the `$delayMinutes` paramete
 $cache->set('key', 'value');
 
 // Get cache, valid for 10 minutes
-$value = $cache->get('key', 'string', 10);
+$value = $cache->get('key', 10);
 ```
 
 ### Storing Arrays, Objects, and Booleans
@@ -66,7 +59,7 @@ You can also store arrays, objects, and booleans.
 $cache->set('array_key', ['a' => 1, 'b' => 2]);
 
 // Retrieving an array
-$array = $cache->get('array_key', 'array');
+$array = $cache->get('array_key');
 
 // Storing an object
 $object = new stdClass();
@@ -74,13 +67,13 @@ $object->property = 'value';
 $cache->set('object_key', $object);
 
 // Retrieving an object
-$object = $cache->get('object_key', 'object');
+$object = $cache->get('object_key');
 
 // Storing a boolean
 $cache->set('boolean_key', true);
 
 // Retrieving a boolean
-$boolean = $cache->get('boolean_key', 'bool');
+$boolean = $cache->get('boolean_key');
 ```
 
 ### Using Subdirectories as Keys

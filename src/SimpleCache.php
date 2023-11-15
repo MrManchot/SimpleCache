@@ -7,15 +7,18 @@ class SimpleCache
     private $cacheDir;
     public $shouldBypassCache = false;
 
-    public function __construct($cacheDir)
+    public function __construct($cacheDir = null)
     {
+        if (is_null($cacheDir)) {
+            $cacheDir = __DIR__ . '/cache/';
+        }
         if (!is_dir($cacheDir)) {
             mkdir($cacheDir, 0755, true);
         }
         $this->cacheDir = $cacheDir;
     }
 
-    public function get($key, $type = 'string', $delayMinutes = 0)
+    public function get($key, $delayMinutes = 0)
     {
         if ($this->shouldBypassCache) {
             return false;
@@ -38,7 +41,7 @@ class SimpleCache
                 return false;
             }
 
-            return $this->decodeContent($content, $type);
+            return unserialize($content);
         }
 
         return false;
@@ -48,10 +51,13 @@ class SimpleCache
     {
         $filename = $this->getCacheFilePath($key);
         if (strpos($key, '/') !== false) {
-            $this->ensureDirectoryExists(dirname($filename));
+            $directory = dirname($filename);
+            if (!is_dir($directory)) {
+                mkdir($directory, 0755, true);
+            }
         }
 
-        $encodedValue = $this->encodeContent($value);
+        $encodedValue = serialize($value);
         file_put_contents($filename, $encodedValue, LOCK_EX);
     }
 
@@ -71,29 +77,4 @@ class SimpleCache
         return $this->cacheDir . $key . '.txt';
     }
 
-    private function ensureDirectoryExists($directory)
-    {
-        if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
-    }
-
-    private function encodeContent($value)
-    {
-        if (is_bool($value)) {
-            return $value ? 'true' : 'false';
-        }
-        return is_string($value) ? $value : json_encode($value);
-    }
-
-    private function decodeContent($content, $type)
-    {
-        if ($type === 'bool') {
-            return $content === 'true';
-        }
-        if ($type === 'string' && $content === 'false') {
-            return '';
-        }
-        return $type === 'string' ? $content : json_decode($content, $type === 'array');
-    }
 }
