@@ -39,7 +39,12 @@ class SimpleCache
                 return false;
             }
 
-            return unserialize($content);
+            try {
+                return unserialize($content);
+            } catch (Exception $e) {
+                error_log('Unserialize error for key : "' . $key . '" : ' . $e->getMessage());
+                return false;
+            }
         }
 
         return false;
