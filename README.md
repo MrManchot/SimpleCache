@@ -1,6 +1,6 @@
 # SimpleCache
 
-A simple and efficient PHP library for cache management.
+SimpleCache is a lightweight and efficient PHP caching library, designed for ease of use and flexibility. Whether you're caching strings, arrays, objects, or booleans, SimpleCache provides a straightforward and intuitive API to speed up your PHP applications. With features like cache expiration and subdirectory organization, it's an ideal solution for both small projects and large-scale applications.
 
 ## Features
 
@@ -43,14 +43,14 @@ $value = $cache->get('key');
 You can specify an expiration time in minutes using the `$delayMinutes` parameter.
 
 ```php
-// Set cache with a 10-minute expiration time
+// Set cache
 $cache->set('key', 'value');
 
 // Get cache, valid for 10 minutes
 $value = $cache->get('key', 10);
 ```
 
-### Storing Arrays, Objects, and Booleans
+### Storing Arrays, Objects, and Booleans:
 
 You can also store arrays, objects, and booleans.
 
@@ -90,7 +90,7 @@ $value = $cache->get('user/1');
 
 ### Clearing the Cache
 
-The clear method allows you to remove cached items based on a pattern. This is useful for batch invalidation of cache items.
+The `clear` method allows you to remove cached items based on a pattern. This is useful for batch invalidation of cache items.
 
 ```php
 // Clear a specific cache item

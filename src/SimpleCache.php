@@ -20,6 +20,7 @@ class SimpleCache
 
     public function get($key, $delayMinutes = 0)
     {
+
         if ($this->shouldBypassCache) {
             return false;
         }
@@ -27,12 +28,9 @@ class SimpleCache
         $filename = $this->getCacheFilePath($key);
 
         if (is_readable($filename)) {
-            if ($delayMinutes > 0) {
-                $stock_cache_time = (time() - filemtime($filename)) / 60;
-                if ($stock_cache_time > $delayMinutes) {
-                    $this->clear($key);
-                    return false;
-                }
+            if ($delayMinutes > 0 && $this->isCacheExpired($filename, $delayMinutes)) {
+                $this->clear($key);
+                return false;
             }
 
             $content = file_get_contents($filename);
@@ -77,4 +75,8 @@ class SimpleCache
         return $this->cacheDir . $key . '.txt';
     }
 
+    private function isCacheExpired($filename, $delayMinutes)
+    {
+        return (time() - filemtime($filename)) / 60 > $delayMinutes;
+    }
 }
