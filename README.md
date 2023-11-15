@@ -84,12 +84,8 @@ Here's an example of how to handle cache hits and misses:
 
 ```php
 $cachedValue = $cache->get('some_key');
-if ($cachedValue !== null) {
-    // Use the value from the cache
-    // ...
-} else {
+if ($cachedValue === null) {
     // The value is not in the cache, compute/generate the value
-    // ...
 }
 ```
 
