@@ -22,7 +22,7 @@ class SimpleCache
     {
 
         if ($this->shouldBypassCache) {
-            return false;
+            return null;
         }
 
         $filename = $this->getCacheFilePath($key);
@@ -30,24 +30,23 @@ class SimpleCache
         if (is_readable($filename)) {
             if ($delayMinutes > 0 && $this->isCacheExpired($filename, $delayMinutes)) {
                 $this->clear($key);
-                return false;
+                return null;
             }
 
             $content = file_get_contents($filename);
             if ($content === false || $content === '') {
                 $this->clear($key);
-                return false;
+                return null;
             }
 
-            try {
-                return unserialize($content);
-            } catch (Exception $e) {
-                error_log('Unserialize error for key : "' . $key . '" : ' . $e->getMessage());
-                return false;
+            $cachedValue = @unserialize($content);
+            if ($cachedValue === false && $content !== serialize(false)) {
+                return null;
             }
+            return $cachedValue;
         }
 
-        return false;
+        return null;
     }
 
     public function set($key, $value)

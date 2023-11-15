@@ -50,7 +50,7 @@ $cache->set('key', 'value');
 $value = $cache->get('key', 10);
 ```
 
-### Storing Arrays, Objects, and Booleans:
+### Storing Arrays, Objects, and Booleans
 
 You can also store arrays, objects, and booleans.
 
@@ -75,6 +75,24 @@ $cache->set('boolean_key', true);
 // Retrieving a boolean
 $boolean = $cache->get('boolean_key');
 ```
+
+### Handling Cache Hits and Misses
+
+When retrieving data from the cache, you can distinguish between a cache hit and a cache miss by checking if the returned value is null. If the value is null, it indicates that the data is not present in the cache (a cache miss), and you may need to compute or generate the value. If the value is not null, it is a cache hit, and you can use the cached value directly.
+
+Here's an example of how to handle cache hits and misses:
+
+```php
+$cachedValue = $cache->get('some_key');
+if ($cachedValue !== null) {
+    // Use the value from the cache
+    // ...
+} else {
+    // The value is not in the cache, compute/generate the value
+    // ...
+}
+```
+
 
 ### Using Subdirectories as Keys
 
