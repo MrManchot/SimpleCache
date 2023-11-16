@@ -116,3 +116,9 @@ $cache->clear('user/*');
 // Clear all cache items
 $cache->clear('*');
 ```
+
+### Run PHPUnit
+
+```
+phpunit test/SimpleCacheTest.php 
+```

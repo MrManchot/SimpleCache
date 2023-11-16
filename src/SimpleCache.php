@@ -13,7 +13,11 @@ class SimpleCache
             $cacheDir = __DIR__ . '/cache/';
         }
         if (!is_dir($cacheDir)) {
-            mkdir($cacheDir, 0755, true);
+            try {
+                mkdir($cacheDir, 0755, true);
+            } catch (\Exception $e) {
+                throw new \Exception('Unable to create cache directory : ' . $cacheDir);
+            }
         }
         $this->cacheDir = $cacheDir;
     }
@@ -51,6 +55,11 @@ class SimpleCache
 
     public function set($key, $value)
     {
+
+        if (!is_string($key)) {
+            throw new \InvalidArgumentException('The key must be a string.');
+        }
+
         $filename = $this->getCacheFilePath($key);
         if (strpos($key, '/') !== false) {
             $directory = dirname($filename);
