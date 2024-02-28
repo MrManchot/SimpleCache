@@ -54,12 +54,18 @@ class SimpleCache
         $parentDir = dirname($cacheDir);
 
         if (!is_dir($cacheDir)) {
-            if (!is_writable($parentDir) && !is_dir($parentDir)) {
-                throw new \Exception("The parent directory ($parentDir) is not writable.");
+            if (!is_dir($parentDir)) {
+                if (!mkdir($parentDir, 0755, true) && !is_dir($parentDir)) {
+                    throw new \Exception('Failed to create parent directory for cache: ' . $parentDir);
+                }
+            }
+
+            if (!is_writable($parentDir)) {
+                throw new \Exception("Parent directory ($parentDir) is not writable.");
             }
 
             if (!mkdir($cacheDir, 0755, true) && !is_dir($cacheDir)) {
-                throw new \Exception('Unable to create cache directory : ' . $cacheDir);
+                throw new \Exception('Failed to create cache directory: ' . $cacheDir);
             }
         }
 
