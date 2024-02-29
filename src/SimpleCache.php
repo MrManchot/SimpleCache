@@ -115,6 +115,9 @@ class SimpleCache
 
     private function isCacheExpired($filename, $delayMinutes)
     {
+        if($delayMinutes <= 0) {
+            return false;
+        }
         $filetime = filemtime($filename);
         return $filetime === false || (time() - $filetime) / 60 > $delayMinutes;
     }
