@@ -100,7 +100,11 @@ class SimpleCache
 
     private function writeCacheFile($filename, $value)
     {
-        $encodedValue = serialize($value);
+        try {
+            $encodedValue = serialize($value);
+        } catch (\Exception $e) {
+            throw new \Exception('Value cannot be serialized.');
+        }
         if (file_put_contents($filename, $encodedValue, LOCK_EX) === false) {
             throw new \Exception('Failed to write cache file.');
         }
@@ -115,7 +119,7 @@ class SimpleCache
 
     private function isCacheExpired($filename, $delayMinutes)
     {
-        if($delayMinutes <= 0) {
+        if ($delayMinutes <= 0) {
             return false;
         }
         $filetime = filemtime($filename);
