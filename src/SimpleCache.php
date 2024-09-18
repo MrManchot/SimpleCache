@@ -28,7 +28,7 @@ class SimpleCache
 
     public function set($key, $value)
     {
-        if (!is_string($key) || strpos($key, '..') !== false) {
+        if (!is_string($key)) {
             throw new \InvalidArgumentException('Invalid key.');
         }
 
@@ -39,11 +39,13 @@ class SimpleCache
 
     public function clear($pattern = '*')
     {
-        $files = glob($this->cacheDir . $pattern);
+        $files = glob($this->cacheDir . $pattern, GLOB_NOSORT);
         $files[] = $this->getCacheFilePath($pattern);
         foreach ($files as $file) {
             if (is_file($file)) {
-                @unlink($file);
+                if (!unlink($file)) {
+                    trigger_error('Failed to delete cache file: ' . $file, E_USER_WARNING);
+                }
             }
         }
     }
@@ -69,13 +71,32 @@ class SimpleCache
             }
         }
 
-        $this->cacheDir = $cacheDir;
+        $this->cacheDir = rtrim($cacheDir, '/') . '/';
     }
-
 
     private function getCacheFilePath($key)
     {
-        return $this->cacheDir . $key . '.txt';
+        $key = $this->sanitizeKey($key);
+        $filePath = $this->cacheDir . $key . '.txt';
+
+        $realCacheDir = realpath($this->cacheDir);
+        $realFilePath = realpath(dirname($filePath));
+
+        if ($realCacheDir === false || $realFilePath === false || strpos($realFilePath, $realCacheDir) !== 0) {
+            throw new \Exception('Invalid cache key or unauthorized access attempt.');
+        }
+
+        return $filePath;
+    }
+
+    private function sanitizeKey($key)
+    {
+        $key = str_replace(['..', '\\', "\0"], '', $key);
+        $key = preg_replace('/[^A-Za-z0-9_\-\/]/', '_', $key);
+        $key = preg_replace('/\/+/', '/', $key);
+        $key = ltrim($key, '/');
+
+        return $key;
     }
 
     private function isCacheValid($filename, $delayMinutes)
@@ -87,11 +108,13 @@ class SimpleCache
     {
         $content = file_get_contents($filename);
         if ($content === false) {
+            trigger_error('Failed to read cache file: ' . $filename, E_USER_WARNING);
             return null;
         }
 
-        $cachedValue = @unserialize($content);
+        $cachedValue = unserialize($content);
         if ($cachedValue === false && $content !== serialize(false)) {
+            trigger_error('Failed to unserialize cache file: ' . $filename, E_USER_WARNING);
             return null;
         }
 
@@ -102,18 +125,22 @@ class SimpleCache
     {
         try {
             $encodedValue = serialize($value);
-        } catch (\Exception $e) {
-            throw new \Exception('Value cannot be serialized.');
+        } catch (\Throwable $e) {
+            trigger_error('Value cannot be serialized: ' . $e->getMessage(), E_USER_WARNING);
+            return;
         }
+
         if (file_put_contents($filename, $encodedValue, LOCK_EX) === false) {
-            throw new \Exception('Failed to write cache file.');
+            trigger_error('Failed to write cache file: ' . $filename, E_USER_WARNING);
         }
     }
 
     private function ensureDirectoryExists($directory)
     {
-        if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
-            throw new \Exception('Failed to create directory: ' . $directory);
+        if (!is_dir($directory)) {
+            if (!mkdir($directory, 0755, true) && !is_dir($directory)) {
+                throw new \Exception('Failed to create directory: ' . $directory);
+            }
         }
     }
 
