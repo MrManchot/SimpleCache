@@ -1,6 +1,6 @@
 # SimpleCache
 
-SimpleCache is a lightweight and efficient PHP caching library, designed for ease of use and flexibility. Whether you're caching strings, arrays, objects, or booleans, SimpleCache provides a straightforward and intuitive API to speed up your PHP applications. With features like cache expiration and subdirectory organization, it's an ideal solution for both small projects and large-scale applications.
+SimpleCache is a lightweight and efficient PHP caching library, designed for ease of use and flexibility. Whether you're caching strings, arrays, objects, or booleans, SimpleCache provides a straightforward and intuitive API to speed up your PHP applications. With features like cache expiration, subdirectory organization, and security measures, it's an ideal solution for both small projects and large-scale applications.
 
 ## Features
 
@@ -8,6 +8,8 @@ SimpleCache is a lightweight and efficient PHP caching library, designed for eas
 - Supports multiple data types: strings, arrays, objects, and booleans
 - Allows setting cache expiration time
 - Option to bypass cache
+- Sanitizes cache keys for security
+- Graceful error handling with warnings instead of exceptions
 
 ## Installation
 
@@ -92,7 +94,7 @@ if ($cachedValue === null) {
 
 ### Using Subdirectories as Keys
 
-You can use subdirectories in keys for better organization.
+You can use subdirectories in keys for better organization. Note that keys are sanitized for security purposes, so only certain characters are allowed.
 
 ```php
 // Set cache in a subdirectory
