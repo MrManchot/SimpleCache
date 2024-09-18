@@ -92,7 +92,7 @@ class SimpleCache
     private function sanitizeKey($key)
     {
         $key = str_replace(['..', '\\', "\0"], '', $key);
-        $key = preg_replace('/[^A-Za-z0-9_\-\/]/', '_', $key);
+        $key = preg_replace('/[^A-Za-z0-9_\-\/\|\*]/', '_', $key);
         $key = preg_replace('/\/+/', '/', $key);
         $key = ltrim($key, '/');
 
