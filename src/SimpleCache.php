@@ -112,13 +112,23 @@ class SimpleCache
             return null;
         }
 
-        $cachedValue = unserialize($content);
-        if ($cachedValue === false && $content !== serialize(false)) {
-            trigger_error('Failed to unserialize cache file: ' . $filename, E_USER_WARNING);
+        if ($this->isSerialized($content)) {
+            $cachedValue = unserialize($content);
+            if ($cachedValue === false && $content !== serialize(false)) {
+                trigger_error('Failed to unserialize cache file: ' . $filename, E_USER_WARNING);
+                return null;
+            }
+
+            return $cachedValue;
+        } else {
+            trigger_error('Cache file content is not serialized: ' . $filename, E_USER_WARNING);
             return null;
         }
+    }
 
-        return $cachedValue;
+    private function isSerialized($str)
+    {
+        return ($str == serialize(false) || @unserialize($str) !== false);
     }
 
     private function writeCacheFile($filename, $value)
