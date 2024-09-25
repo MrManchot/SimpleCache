@@ -29,7 +29,8 @@ class SimpleCache
     public function set($key, $value)
     {
         if (!is_string($key)) {
-            throw new \InvalidArgumentException('Invalid key.');
+            trigger_error('Invalid key.', E_USER_WARNING);
+            return;
         }
 
         $filename = $this->getCacheFilePath($key);
@@ -58,16 +59,19 @@ class SimpleCache
         if (!is_dir($cacheDir)) {
             if (!is_dir($parentDir)) {
                 if (!mkdir($parentDir, 0755, true) && !is_dir($parentDir)) {
-                    throw new \Exception('Failed to create parent directory for cache: ' . $parentDir);
+                    trigger_error('Failed to create parent directory for cache: ' . $parentDir, E_USER_WARNING);
+                    return;
                 }
             }
 
             if (!is_writable($parentDir)) {
-                throw new \Exception("Parent directory ($parentDir) is not writable.");
+                trigger_error("Parent directory ($parentDir) is not writable.", E_USER_WARNING);
+                return;
             }
 
             if (!mkdir($cacheDir, 0755, true) && !is_dir($cacheDir)) {
-                throw new \Exception('Failed to create cache directory: ' . $cacheDir);
+                trigger_error('Failed to create cache directory: ' . $cacheDir, E_USER_WARNING);
+                return;
             }
         }
 
@@ -76,14 +80,22 @@ class SimpleCache
 
     private function getCacheFilePath($key)
     {
+        $initialKey = $key;
         $key = $this->sanitizeKey($key);
         $filePath = $this->cacheDir . $key . '.txt';
 
         $realCacheDir = realpath($this->cacheDir);
-        $realFilePath = realpath(dirname($filePath));
+        if ($realCacheDir === false) {
+            trigger_error('Invalid cache directory: ' . $this->cacheDir, E_USER_WARNING);
+            return $filePath;
+        }
 
-        if ($realCacheDir === false || $realFilePath === false || strpos($realFilePath, $realCacheDir) !== 0) {
-            throw new \Exception('Invalid cache key or unauthorized access attempt.');
+        $fileDir = dirname($filePath);
+        $realFileDir = realpath($fileDir);
+
+        if ($realFileDir !== false && strpos($realFileDir, $realCacheDir) !== 0) {
+            trigger_error('Invalid cache key or unauthorized access attempt : ' . $initialKey, E_USER_WARNING);
+            return $filePath;
         }
 
         return $filePath;
@@ -113,7 +125,7 @@ class SimpleCache
         }
 
         if ($this->isSerialized($content)) {
-            $cachedValue = unserialize($content);
+            $cachedValue = @unserialize($content);
             if ($cachedValue === false && $content !== serialize(false)) {
                 trigger_error('Failed to unserialize cache file: ' . $filename, E_USER_WARNING);
                 return null;
@@ -128,7 +140,7 @@ class SimpleCache
 
     private function isSerialized($str)
     {
-        return ($str == serialize(false) || @unserialize($str) !== false);
+        return ($str === serialize(false) || @unserialize($str) !== false);
     }
 
     private function writeCacheFile($filename, $value)
@@ -149,7 +161,8 @@ class SimpleCache
     {
         if (!is_dir($directory)) {
             if (!mkdir($directory, 0755, true) && !is_dir($directory)) {
-                throw new \Exception('Failed to create directory: ' . $directory);
+                trigger_error('Failed to create directory: ' . $directory, E_USER_WARNING);
+                return;
             }
         }
     }
