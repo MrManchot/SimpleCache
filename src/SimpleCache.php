@@ -133,7 +133,6 @@ class SimpleCache
 
             return $cachedValue;
         } else {
-            trigger_error('Cache file content is not serialized: ' . $filename, E_USER_WARNING);
             return null;
         }
     }
